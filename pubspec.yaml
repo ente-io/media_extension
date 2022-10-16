@@ -1,7 +1,7 @@
 name: media_extension
 description: A new Flutter plugin project.
-version: 0.0.1
-homepage:
+version: 0.0.2
+homepage: https://github.com/ente-io/media_extension
 
 environment:
   sdk: '>=2.18.0 <3.0.0'
