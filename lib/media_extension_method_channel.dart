@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:media_extension/media_extension_action_types.dart';
 
 import 'media_extension_platform_interface.dart';
 
@@ -70,5 +73,31 @@ class MethodChannelMediaExtension extends MediaExtensionPlatform {
       debugPrint(e.message);
     }
     return false;
+  }
+
+  @override
+  Future<MediaExtentionAction> getIntentAction() async {
+    final Completer<MediaExtentionAction> completer =
+        Completer<MediaExtentionAction>();
+    methodChannel.setMethodCallHandler((call) async {
+      final List<String> args = call.arguments.toString().split("!");
+      final String action = args[0];
+      final String uri = args[1];
+      MediaExtentionAction intentAction =
+          MediaExtentionAction(action: actionStringify(action), uri: uri);
+      completer.complete(intentAction);
+    });
+    return completer.future;
+  }
+
+  @override
+  Future<void> setResult(String uri) async {
+    try {
+      await methodChannel.invokeMethod('setResult', {
+        'uri': uri,
+      });
+    } on PlatformException catch (e) {
+      debugPrint(e.message);
+    }
   }
 }

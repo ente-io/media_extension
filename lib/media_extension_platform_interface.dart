@@ -1,3 +1,4 @@
+import 'package:media_extension/media_extension_action_types.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'media_extension_method_channel.dart';
@@ -48,6 +49,14 @@ abstract class MediaExtensionPlatform extends PlatformInterface {
     String mimeType, {
     String title = "Open with",
   }) async {
+    throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  Future<MediaExtentionAction> getIntentAction() async {
+    throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  Future<void> setResult(String uri) async {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }

@@ -2,10 +2,10 @@
 <paths>
     <external-path
         name="external_files"
-        path="." />
+        path="SharableImages" />
 
     <!-- embedded images & other media that are exported for viewing and sharing -->
     <cache-path
-        name="embedded"
-        path="." />
+        name="shared"
+        path="images/" />
 </paths>

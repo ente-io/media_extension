@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_extension_example/download.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:media_extension/media_extension_action_types.dart';
 
 import 'package:media_extension/media_extension.dart';
 
@@ -23,6 +24,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final imgUrl = "https://cdn-chat.sstatic.net/chat/img/404_funny_hats.jpg";
   String _platformVersion = 'Unknown';
+  IntentAction _intentAction = IntentAction.main;
   final _mediaExtensionPlugin = MediaExtension();
   final _downloadHelper = DownloadHelper(Dio());
 
@@ -35,17 +37,28 @@ class _MyAppState extends State<MyApp> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     String platformVersion;
+    IntentAction intentAction = IntentAction.main;
     try {
       platformVersion = await _mediaExtensionPlugin.getPlatformVersion() ??
           'Unknown platform version';
+      final actionResult = await _mediaExtensionPlugin.getIntentAction();
+      intentAction = actionResult.action!;
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
     if (!mounted) return;
 
     setState(() {
+      _intentAction = intentAction;
       _platformVersion = platformVersion;
     });
+  }
+
+  Future<String> _getLocalFile(String filename) async {
+    var tempDir = await getTemporaryDirectory();
+    String fullPath = "${tempDir.path}/image.jpg'";
+    await _downloadHelper.downloadToFile(imgUrl, fullPath);
+    return fullPath;
   }
 
   @override
@@ -59,7 +72,23 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Running on: $_platformVersion\n'),
+              Text('Platform is: $_platformVersion\n'),
+              Text('Intent Action is: $_intentAction\n'),
+              FutureBuilder(
+                  future: _getLocalFile("image.jpg"),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String> snapshot) {
+                    return snapshot.data != null
+                        ? GestureDetector(
+                            child: Image.file(File(snapshot.data!)),
+                            onTap: () async {
+                              if (_intentAction == IntentAction.pick) {
+                                _mediaExtensionPlugin.setResult(snapshot.data!);
+                              }
+                            },
+                          )
+                        : Container();
+                  }),
               GestureDetector(
                 child: Text(
                   'Set as',
