@@ -82,8 +82,10 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
         }
     }
-
-    private fun getIntentAction() : String {
+    
+    /// This Method is triggered when the app is opened and it sends the [intent-action] 
+    /// and [uri] information in a HashMap Structure to the Flutter thread.
+    private fun getIntentAction() : HashMap<String, String> {
         val intent: Intent? = activity!!.intent
         var uri = ""
         var resAction = IntentAction.valueOf("MAIN")
@@ -107,17 +109,21 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     }
                 }
             }
-           val result = resAction.toString() + "!" + uri
+           val result = HashMap<String,String>()
+           result["action"] = resAction.toString()
+           result["uri"] = uri
            return result
     }
 
+    /// This Method is triggered by the Flutter thread with arguments containing
+    /// and [uri] of the selected image and sends the image to the requested app
+    /// via RESULT_ACTION Intent using Content Provider
     private fun setResult(call: MethodCall, result:MethodChannel.Result){
         val arguments : Map<String,String>? = (call.arguments() as Map<String,String>?)
-        val path = arguments!!["uri"]
-        val uri = getPickedUri(context, Uri.parse(path))
-        val uriString = uri!!.toString();
+        var path = arguments!!["uri"]
+        val uri = getShareableUri(context, Uri.parse(path))
         val intent: Intent = Intent("io.ente.RESULT_ACTION")
-        intent.setData(uri);
+        intent.setData(uri)
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         activity!!.setResult(Activity.RESULT_OK, intent)
         activity!!.finish()     
@@ -173,23 +179,6 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         result.success(started)
     }
 
-    private fun getPickedUri(context: Context, uri: Uri): Uri? {
-        val bitmap: Bitmap
-        val path : Uri = Uri.parse("file://${uri.toString()}")
-        val source = ImageDecoder.createSource(activity!!.contentResolver,path)
-        bitmap = ImageDecoder.decodeBitmap(source)
-        val imagesFolder = File(activity!!.cacheDir,"images")
-        var contentUri: Uri? = null
-        imagesFolder.mkdirs()
-        val file = File(imagesFolder,"shared.jpeg")
-        val stream = FileOutputStream(file)
-        bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream)
-        stream.flush()
-        stream.close()
-        contentUri = FileProvider.getUriForFile(context,"${context.packageName}.fileprovider",file)
-        return contentUri
-    }
-
     private fun getShareableUri(context: Context, uri: Uri): Uri? {
         /* https://developer.android.com/training/secure-file-sharing/setup-sharing.html
         https://developer.android.com/training/secure-file-sharing/setup-sharing.html
@@ -198,7 +187,7 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             ContentResolver.SCHEME_FILE -> {
                 uri.path?.let { path ->
                     val authority = "${context.packageName}.file_provider"
-                    FileProvider.getUriForFile(context, authority, File(path))
+                    FileProvider.getUriForFile(context,"${context.packageName}.file_provider", File(path))
                 }
             }
             else -> uri

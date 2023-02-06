@@ -75,14 +75,16 @@ class MethodChannelMediaExtension extends MediaExtensionPlatform {
     return false;
   }
 
+  /// This Method is triggered by the Native Thread which sends the [intentAction]
+  /// and [uri] information in a HashMap Structure to the Flutter thread.
   @override
   Future<MediaExtentionAction> getIntentAction() async {
     final Completer<MediaExtentionAction> completer =
         Completer<MediaExtentionAction>();
     methodChannel.setMethodCallHandler((call) async {
-      final List<String> args = call.arguments.toString().split("!");
-      final String action = args[0];
-      final String uri = args[1];
+      final dynamic args = call.arguments;
+      final String action = args["action"];
+      final String uri = args["uri"];
       MediaExtentionAction intentAction =
           MediaExtentionAction(action: actionStringify(action), uri: uri);
       completer.complete(intentAction);
@@ -90,6 +92,8 @@ class MethodChannelMediaExtension extends MediaExtensionPlatform {
     return completer.future;
   }
 
+  /// This Method is sends the selected Image's [uri] to the native thread.
+  /// from the Flutter thread to send results the [INTENT_ACTION_PICK].
   @override
   Future<void> setResult(String uri) async {
     try {

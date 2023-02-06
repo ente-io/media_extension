@@ -48,7 +48,7 @@
           <!-- file provider to share files having a file:// URI -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
+            android:authorities="${applicationId}.file_provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

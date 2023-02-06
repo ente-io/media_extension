@@ -56,7 +56,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<String> _getLocalFile(String filename) async {
     var tempDir = await getTemporaryDirectory();
-    String fullPath = "${tempDir.path}/image.jpg'";
+    String fullPath = "${tempDir.path}/image.jpg";
     await _downloadHelper.downloadToFile(imgUrl, fullPath);
     return fullPath;
   }
@@ -83,7 +83,8 @@ class _MyAppState extends State<MyApp> {
                             child: Image.file(File(snapshot.data!)),
                             onTap: () async {
                               if (_intentAction == IntentAction.pick) {
-                                _mediaExtensionPlugin.setResult(snapshot.data!);
+                                _mediaExtensionPlugin
+                                    .setResult("file://${snapshot.data!}");
                               }
                             },
                           )
