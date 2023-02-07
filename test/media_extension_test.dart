@@ -12,35 +12,24 @@ class MockMediaExtensionPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<bool> edit(String uri, String mimeType, {String title = "Edit"}) {
-    // TODO: implement edit
-    throw UnimplementedError();
-  }
+  Future<bool> edit(String uri, String mimeType, {String title = 'Edit'}) =>
+      Future.value(true);
 
   @override
   Future<bool> openWith(String uri, String mimeType,
-      {String title = "Open with"}) {
-    // TODO: implement openWith
-    throw UnimplementedError();
-  }
+          {String title = 'Open with'}) =>
+      Future.value(true);
 
   @override
-  Future<bool> setAs(String uri, String mimeType, {String title = "Set as"}) {
-    // TODO: implement setAs
-    throw UnimplementedError();
-  }
+  Future<bool> setAs(String uri, String mimeType, {String title = 'Set as'}) =>
+      Future.value(true);
 
   @override
-  Future<MediaExtentionAction> getIntentAction() {
-    // TODO: implement getIntentAction
-    throw UnimplementedError();
-  }
+  Future<MediaExtentionAction> getIntentAction() =>
+      Future.value(MediaExtentionAction(action: IntentAction.main));
 
   @override
-  Future<void> setResult(String uri) {
-    // TODO: implement setResult
-    throw UnimplementedError();
-  }
+  Future<void> setResult(String uri) => Future.value();
 }
 
 void main() {
@@ -57,5 +46,13 @@ void main() {
     MediaExtensionPlatform.instance = fakePlatform;
 
     expect(await mediaExtensionPlugin.getPlatformVersion(), '42');
+  });
+
+  test('edit', () async {
+    MediaExtension mediaExtensionPlugin = MediaExtension();
+    MockMediaExtensionPlatform fakePlatform = MockMediaExtensionPlatform();
+    MediaExtensionPlatform.instance = fakePlatform;
+
+    expect(await mediaExtensionPlugin.edit('', ''), true);
   });
 }

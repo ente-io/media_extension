@@ -23,7 +23,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final imgUrl = "https://cdn-chat.sstatic.net/chat/img/404_funny_hats.jpg";
-  String _platformVersion = 'Unknown';
   IntentAction _intentAction = IntentAction.main;
   final _mediaExtensionPlugin = MediaExtension();
   final _downloadHelper = DownloadHelper(Dio());
@@ -36,21 +35,17 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    String platformVersion;
     IntentAction intentAction = IntentAction.main;
     try {
-      platformVersion = await _mediaExtensionPlugin.getPlatformVersion() ??
-          'Unknown platform version';
       final actionResult = await _mediaExtensionPlugin.getIntentAction();
       intentAction = actionResult.action!;
     } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
+      intentAction = IntentAction.unknown;
     }
     if (!mounted) return;
 
     setState(() {
       _intentAction = intentAction;
-      _platformVersion = platformVersion;
     });
   }
 
@@ -72,7 +67,6 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Platform is: $_platformVersion\n'),
               Text('Intent Action is: $_intentAction\n'),
               FutureBuilder(
                   future: _getLocalFile("image.jpg"),

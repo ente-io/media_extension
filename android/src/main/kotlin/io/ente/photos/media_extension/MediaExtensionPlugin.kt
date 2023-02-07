@@ -24,14 +24,10 @@ import java.io.*
 import java.util.*
 import android.graphics.*
 
-/*
-CREDITS:
-Almost all the code in the plugin is pulled out from Aves Gallery
-https://github.com/deckerst/aves/
- */
-/** MediaExtensionPlugin */
+/// The Class which implements Activity Aware FlutterPlugin
 class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     PluginRegistry.ActivityResultListener {
+
     /// The MethodChannel that will the communication between Flutter and native Android
     ///
     /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -42,6 +38,7 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val LOG_TAG = "MediaExtensionPlugin";
 
+    ///ENUM of all the possible IntentAction for a galler app.
     enum class IntentAction {
         MAIN,
         PICK,
@@ -50,16 +47,30 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         UNKNOWN
     }
 
+    /// The Method invoked when FlutterEngine is attached to the app
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        ///Application context is assigned to variable context 
         context = flutterPluginBinding.applicationContext
+
+        ///Method Channel instance is created for channel [media_extension]
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "media_extension")
+
+        ///To Trigger events in mainThread
         Handler(Looper.getMainLooper()).postDelayed(Runnable {
+
+            /// `getIntentAction` method is invoked 
+            /// to send data from android to flutter thread
             val intentChecker = getIntentAction()
             channel.invokeMethod("getIntentAction", intentChecker)
         },0)
+        
+        /// Method Channel handler which handles all the methods
+        /// invoked from flutter thread
         channel.setMethodCallHandler(this)
     }
 
+
+    /// The Method invoked when a methodCall is executed from flutter thread
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         when (call.method) {
             "getPlatformVersion" -> {
@@ -83,7 +94,7 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
     
-    /// This Method is triggered when the app is opened and it sends the [intent-action] 
+    /// The Method is triggered when the app is opened and it sends the [intent-action] 
     /// and [uri] information in a HashMap Structure to the Flutter thread.
     private fun getIntentAction() : HashMap<String, String> {
         val intent: Intent? = activity!!.intent
@@ -115,7 +126,7 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
            return result
     }
 
-    /// This Method is triggered by the Flutter thread with arguments containing
+    /// The Method is triggered by the Flutter thread with arguments containing
     /// and [uri] of the selected image and sends the image to the requested app
     /// via RESULT_ACTION Intent using Content Provider
     private fun setResult(call: MethodCall, result:MethodChannel.Result){
@@ -129,6 +140,9 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         activity!!.finish()     
     }
 
+    /// The Method is triggered by the Flutter thread with arguments containing
+    /// and [uri] of the selected image and sends the image to the choosen app
+    /// which can handle the `ACTION_ATTACH_DATA` Intent
     private fun setAs(call: MethodCall, result: MethodChannel.Result) {
         val title = "Set as"
         val uri = call.argument<String>("uri")?.let { Uri.parse(it) }
@@ -145,6 +159,9 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         result.success(started)
     }
 
+    /// The Method is triggered by the Flutter thread with arguments containing
+    /// and [uri] of the selected image and sends the image to the choosen app
+    /// which can handle the `ACTION_VIEW` Intent
     private fun openWith(call: MethodCall, result: MethodChannel.Result) {
         val title = call.argument<String>("title")
         val uri = call.argument<String>("uri")?.let { Uri.parse(it) }
@@ -162,6 +179,9 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         result.success(started)
     }
 
+    /// The Method is triggered by the Flutter thread with arguments containing
+    /// and [uri] of the selected image and sends the image to the choosen app
+    /// which can handle the `ACTION_EDIT` Intent
     private fun edit(call: MethodCall, result: MethodChannel.Result) {
         val title = call.argument<String>("title")
         val uri = call.argument<String>("uri")?.let { Uri.parse(it) }
@@ -179,6 +199,8 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         result.success(started)
     }
 
+    /// The Method is creates content of the file which needs to be shared to
+    /// other app using content resolver.
     private fun getShareableUri(context: Context, uri: Uri): Uri? {
         /* https://developer.android.com/training/secure-file-sharing/setup-sharing.html
         https://developer.android.com/training/secure-file-sharing/setup-sharing.html
@@ -194,6 +216,8 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
 
+    /// The Method is used to list out all the available apps 
+    ///  which can handle the Supplied Intent Action.
     private fun safeStartActivityChooser(title: String?, intent: Intent): Boolean {
         if (activity?.let { intent.resolveActivity(it.packageManager) } == null) {
             Log.i(LOG_TAG, " intent=$intent resolved activity return null")
@@ -222,6 +246,8 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         channel.setMethodCallHandler(null)
     }
 
+    /// The Method Invoked after the Plugin is attached to Flutter engine
+    /// Provides the activity context of the application
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity;
         binding.addActivityResultListener(this);
