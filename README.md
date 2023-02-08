@@ -28,6 +28,25 @@ A Gallery Extension plugin by ente.io team.
 
 * The received Uri we create another temp file in our cache-directory and granting other applications to read from that directory and once the `content://uri` (content provider) is created the result is sent to the requested activity via the intent.
 
+## DataTypes Descriptions
+
+  Types                |   Fields            | 
+--------------------   | ------------------  | 
+`IntentAction`  | enumeration of **main**, **pick**, **edit**, **view** |
+`MediaExtentionAction`  | <p>**IntentAction** `action` [type of intent-action which invoked the app]</p> **String?** `uri` [uri of the image sent by other app with the intent]  |
+
+
+
+## Method Descriptions
+
+  Methods                |   Parameters                       |   Return
+-----------------------  | -------------------------------    | ---------------
+`getIntentAction`          |                                    |  **MediaExtentionAction**                                      | 
+`setResult`  | <p>**String** `uri` [path of the file selected]</p>  | **void** 
+`setAs`  | <p>**String** `uri` [path of the file selected]</p> **String** `mimeType` [mimeType of the file selected]   | **void**
+`openWith`  | <p>**String** `uri` [path of the file selected]</p>**String** `mimeType` [mimeType of the file selected]   | **void**
+`edit`  | <p>**String** `uri` [path of the file selected]</p>**String** `mimeType` [mimeType of the file selected]   | **void**
+
 ## Getting started
 To use this plugin:
 * Run the following command in terminal
@@ -83,17 +102,6 @@ To use this plugin:
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
-
-          <!-- file provider to share files having a file:// URI -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.file_provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths" />
-        </provider>
 
     </application>
     ```

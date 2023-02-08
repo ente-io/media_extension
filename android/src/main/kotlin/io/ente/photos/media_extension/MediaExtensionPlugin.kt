@@ -104,7 +104,10 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val data: Uri? = intent.data
                 val action = intent?.getAction()
                 when(action){
-                    Intent.ACTION_PICK -> {
+                    Intent.ACTION_PICK  -> {
+                        resAction = IntentAction.valueOf("PICK")
+                    }
+                    Intent.ACTION_GET_CONTENT -> {
                         resAction = IntentAction.valueOf("PICK")
                     }
                     Intent.ACTION_EDIT -> {
