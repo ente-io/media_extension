@@ -1,6 +1,7 @@
+import 'package:media_extension/media_extension_action_types.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'media_extension_method_channel.dart';
+import 'package:media_extension/media_extension_method_channel.dart';
 
 abstract class MediaExtensionPlatform extends PlatformInterface {
   /// Constructs a MediaExtensionPlatform.
@@ -23,31 +24,45 @@ abstract class MediaExtensionPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  /// abstract method for `getPlatformVersion` method.
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
+  /// abstract method for `setAs` method.
   Future<bool> setAs(
     String uri,
     String mimeType, {
-    String title = "Set as",
+    String title = 'Set as',
   }) async {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
+  /// abstract method for `edit` method.
   Future<bool> edit(
     String uri,
     String mimeType, {
-    String title = "Edit",
+    String title = 'Edit',
   }) async {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
+  /// abstract method `openWith` method.
   Future<bool> openWith(
     String uri,
     String mimeType, {
-    String title = "Open with",
+    String title = 'Open with',
   }) async {
+    throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  /// abstract method `getIntentAction` method.
+  Future<MediaExtentionAction> getIntentAction() async {
+    throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  /// abstract method `setResult` method.
+  Future<void> setResult(String uri) async {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }
