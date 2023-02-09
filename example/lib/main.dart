@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -26,6 +27,7 @@ class _MyAppState extends State<MyApp> {
   IntentAction _intentAction = IntentAction.main;
   final _mediaExtensionPlugin = MediaExtension();
   final _downloadHelper = DownloadHelper(Dio());
+  String base = '';
 
   @override
   void initState() {
@@ -36,9 +38,16 @@ class _MyAppState extends State<MyApp> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     IntentAction intentAction = IntentAction.main;
+    String bases = '';
     try {
       final actionResult = await _mediaExtensionPlugin.getIntentAction();
+
       intentAction = actionResult.action!;
+
+      if (intentAction == IntentAction.view) {
+        bases =
+            (await _mediaExtensionPlugin.getResolvedContent(actionResult.uri!));
+      }
     } on PlatformException {
       intentAction = IntentAction.unknown;
     }
@@ -46,6 +55,7 @@ class _MyAppState extends State<MyApp> {
 
     setState(() {
       _intentAction = intentAction;
+      base = bases;
     });
   }
 
@@ -68,6 +78,9 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('Intent Action is: $_intentAction\n'),
+              _intentAction == IntentAction.view
+                  ? Image.memory(base64Decode(base))
+                  : Container(),
               FutureBuilder(
                   future: _getLocalFile("image.jpg"),
                   builder:
@@ -87,7 +100,7 @@ class _MyAppState extends State<MyApp> {
               GestureDetector(
                 child: Text(
                   'Set as',
-                  style: Theme.of(context).textTheme.headline4,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 onTap: () async {
                   var tempDir = await getTemporaryDirectory();
@@ -105,7 +118,7 @@ class _MyAppState extends State<MyApp> {
               GestureDetector(
                 child: Text(
                   'Edit',
-                  style: Theme.of(context).textTheme.headline4,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 onTap: () async {
                   var tempDir = await getTemporaryDirectory();
@@ -123,7 +136,7 @@ class _MyAppState extends State<MyApp> {
               GestureDetector(
                 child: Text(
                   'Open With',
-                  style: Theme.of(context).textTheme.headline4,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 onTap: () async {
                   var tempDir = await getTemporaryDirectory();
