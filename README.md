@@ -1,32 +1,22 @@
 # media_extension
 
-A Gallery Extension plugin by ente.io team.
-
-* The plugin a app would need to implement a complete gallery app.
-* Allows other apps to pick images from your gallery app.
-
-* ##### About us
-    * ente.io was born out of a need for a private storage solution for personal photos and videos. 
-    * There was nothing out there that ticked all the boxes, so we started building one.
+Plugin to help a Flutter application behave like a native gallery, by [ente](https://ente.io).
 
 ## Features
-* Allows the app to identify and handle case of our app's invocation by other app via what kind of intent-action.
-* By invoking `getIntentAction` method, the following intentActions can be identified.
-    - `PICK`
-    - `EDIT`
-    - `VIEW`
-* Provides `setResult` method to pass the uri of the selected image to the requesting app by creating a temporary copy of that image in the content-provider path.
+
+1. Allows to identify and handle invocation from a different app, along with details of the intent-action with which it was triggered (`PICK` / `EDIT` / `VIEW`). You can also use the `setResult` method to pass the URI of the selected media file to the requesting app, by creating a temporary copy within the content-provider path.
+2. Ability to open an image with an third-party app (gallery, editor, wallpaper manager, etc.)
 
 ## Implementation
 <p align="center">
   <img src="https://user-images.githubusercontent.com/63253383/217319703-73916653-7222-4143-b2cf-6192a3671c61.png" />
 </p>
 
-* Native code invokes flutter code by invoking the flutter method from `onAttachedEngineMethod` in native code which returns the mode asynchronously and we use completer in dart code to get the status and set the mode of the app.
+* Native code invokes Flutter code by invoking the Flutter method from `onAttachedEngineMethod`, which returns the mode asynchronously. We use a `Completer` in the Dart code to get the status and set the mode of the app.
 
-* When it is Gallery-Mode the Uri of the chosen image from the applications document storage directory and another method call is made to native code with the uri as the parameter.
+* While behaving as a Gallery, the URI of the chosen image from the applications document storage directory and another method call is made to native code with the URI as the parameter.
 
-* The received Uri we create another temp file in our cache-directory and granting other applications to read from that directory and once the `content://uri` (content provider) is created the result is sent to the requested activity via the intent.
+* We create a temporary file in our cache-directory with the received URI, and grants other applications permission to read from that directory. Once the `content://uri` (Content Provider) is created the result is sent to the requested activity via the intent.
 
 ## DataTypes Descriptions
 
