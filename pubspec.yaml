@@ -1,6 +1,6 @@
 name: media_extension
-description: A new Flutter plugin project.
-version: 0.0.3
+description: Plugin to help a Flutter application behave like a native gallery
+version: 1.0.0
 homepage: https://github.com/ente-io/media_extension
 
 environment:
