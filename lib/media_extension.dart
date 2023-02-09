@@ -20,4 +20,7 @@ class MediaExtension {
 
   Future<void> setResult(String uri) =>
       MediaExtensionPlatform.instance.setResult(uri);
+
+  Future<String> getResolvedContent(String uri) =>
+      MediaExtensionPlatform.instance.getResolvedContent(uri);
 }

@@ -119,4 +119,20 @@ class MethodChannelMediaExtension extends MediaExtensionPlatform {
       debugPrint(e.message);
     }
   }
+
+  final eventChannel = const EventChannel('media_resolver');
+
+  @override
+  Future<String> getResolvedContent(String uri) async {
+    String base = '';
+    try {
+      base = await methodChannel
+          .invokeMethod('getResolvedContent', <String, dynamic>{
+        'uri': uri,
+      });
+    } on PlatformException catch (e) {
+      debugPrint(e.message);
+    }
+    return base;
+  }
 }
