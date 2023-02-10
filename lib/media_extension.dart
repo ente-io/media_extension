@@ -2,6 +2,7 @@ import 'package:media_extension/media_extension_action_types.dart';
 
 import 'package:media_extension/media_extension_platform_interface.dart';
 
+/// Class which contains all the methods of the plugin
 class MediaExtension {
   Future<String?> getPlatformVersion() =>
       MediaExtensionPlatform.instance.getPlatformVersion();
@@ -20,7 +21,4 @@ class MediaExtension {
 
   Future<void> setResult(String uri) =>
       MediaExtensionPlatform.instance.setResult(uri);
-
-  Future<String> getResolvedContent(String uri) =>
-      MediaExtensionPlatform.instance.getResolvedContent(uri);
 }

@@ -30,12 +30,6 @@ class MockMediaExtensionPlatform
 
   @override
   Future<void> setResult(String uri) => Future.value();
-
-  @override
-  Future<String> getResolvedContent(String uri) {
-    // TODO: implement getResolvedContent
-    throw UnimplementedError();
-  }
 }
 
 void main() {

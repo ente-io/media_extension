@@ -62,9 +62,51 @@ IntentAction actionParser(String actionString) {
 /// * String uri: uri passed via the Intent.
 class MediaExtentionAction {
   final IntentAction? action;
-  final String? uri;
+  final String? data;
+  final MediaType? type;
+  final String? extension;
+  final String? name;
   MediaExtentionAction({
+    this.name,
+    this.type,
+    this.extension,
     this.action,
-    this.uri,
+    this.data,
   });
+}
+
+/// The Enum represents the MediaType of uri which as invoked the app.
+///
+/// * video
+/// * image
+enum MediaType {
+  video,
+  image,
+}
+
+/// * Method which converts the string value to the MediaType
+/// * Used for converting the string from native code to dart type
+///
+/// Example:
+///  ```dart
+///   String actionString = 'video'
+///   MediaType type = mediaParser(actionString);
+///   print(type);
+///   ```
+/// Output:
+/// ```bash
+///  MediaType.video
+/// ```
+MediaType? mediaParser(String mediaString) {
+  MediaType? type;
+
+  switch (mediaString) {
+    case 'video':
+      type = MediaType.video;
+      break;
+    case 'image':
+      type = MediaType.image;
+      break;
+  }
+  return type;
 }

@@ -4,8 +4,11 @@ import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.net.Uri
 import android.os.*
+import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Log
 import androidx.core.content.FileProvider
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -17,8 +20,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import java.io.*
-
 import java.util.*
+import kotlin.collections.HashMap
 
 
 /// The Class which implements Activity Aware FlutterPlugin
@@ -72,9 +75,6 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             "setResult" -> {
                 setResult(call)
             }
-            "getResolvedContent" -> {
-                getResolvedContent(call,result)
-            }
             "setAs" -> {
                 setAs(call, result)
             }
@@ -94,27 +94,41 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     /// The Method is triggered by the Flutter thread with arguments containing
     /// and [uri] of the received image of type content://xyz
     /// and returns the base64EncodedString of it.
-    private fun getResolvedContent(call: MethodCall, result: Result) {
-        val content = Uri.parse(call.argument("uri"))
-        val contentStream= context.contentResolver.openInputStream(content)
-        val base = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Base64.getEncoder().encodeToString(contentStream?.readBytes())
-        } else {
-            android.util.Base64.encodeToString(contentStream?.readBytes(), 
-            android.util.Base64.DEFAULT)
+    private fun getResolvedContent(contentUri:Uri, contentType:String, resolvedContent: HashMap<String,String>) {
+        val resolver =  context.contentResolver
+        val contentStream= resolver.openInputStream(contentUri)
+        val cursor: Cursor = resolver.query(contentUri, null, null, null, null)!!
+        val nameIndex: Int = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        cursor.moveToFirst()
+        resolvedContent["name"]  = cursor.getString(nameIndex)
+        val fileType = contentType.split("/")
+        resolvedContent["type"] = fileType[0]
+        resolvedContent["extension"] = fileType[1]
+        if(contentType.startsWith("video")){
+            resolvedContent["data"] = contentUri.toString()
+        }else if(contentType.startsWith("image")) {
+            resolvedContent["data"] = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Base64.getEncoder().encodeToString(contentStream?.readBytes())
+            } else {
+                android.util.Base64.encodeToString(
+                    contentStream?.readBytes(),
+                    android.util.Base64.DEFAULT
+                )
+            }
         }
+        cursor.close()
         contentStream?.close()
-        result.success(base)
     }
 
     /// The Method is triggered when the app is opened and it sends the [intent-action]
     /// and [uri] information in a HashMap Structure to the Flutter thread.
     private fun getIntentAction() : HashMap<String, String> {
         val intent: Intent? = activity!!.intent
-        var uri = ""
+        val result = HashMap<String,String>()
         var resAction = IntentAction.valueOf("MAIN")
         if(intent!=null){
                 val data: Uri? = intent.data
+                val type: String? = intent.type
                 when(intent.action){
                     Intent.ACTION_PICK  -> {
                         resAction = IntentAction.valueOf("PICK")
@@ -124,20 +138,17 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     }
                     Intent.ACTION_EDIT -> {
                         resAction = IntentAction.valueOf("EDIT")
-                        uri = data.toString()
                     }
                     Intent.ACTION_VIEW -> {
                         resAction = IntentAction.valueOf("VIEW")
-                        uri = data.toString()
+                        getResolvedContent(data!!,type!!,result)
                     }
                     else -> {
                         resAction = IntentAction.valueOf("MAIN")
                     }
                 }
             }
-           val result = HashMap<String,String>()
            result["action"] = resAction.toString()
-           result["uri"] = uri
            return result
     }
 

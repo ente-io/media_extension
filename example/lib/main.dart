@@ -49,6 +49,9 @@ class _MyAppState extends State<MyApp> {
             VideoPlayerController.contentUri(Uri.parse(intentAction.data!));
         await _controller.initialize();
       }
+    } on PlatformException {
+      intentAction = MediaExtentionAction(action: IntentAction.main);
+      throw ("Platform exception");
     } on Exception catch (_) {
       intentAction = MediaExtentionAction(action: IntentAction.main);
     }

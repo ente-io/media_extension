@@ -95,10 +95,12 @@ class MethodChannelMediaExtension extends MediaExtensionPlatform {
         Completer<MediaExtentionAction>();
     methodChannel.setMethodCallHandler((call) async {
       final dynamic args = call.arguments;
-      final String action = args['action'];
-      final String uri = args['uri'];
-      MediaExtentionAction intentAction =
-          MediaExtentionAction(action: actionParser(action), uri: uri);
+      MediaExtentionAction intentAction = MediaExtentionAction(
+          action: actionParser(args['action']),
+          name: args['name'],
+          type: mediaParser(args['type']),
+          extension: args['extension'],
+          data: args['data']);
       //Completes the Completer
       completer.complete(intentAction);
     });
@@ -118,21 +120,5 @@ class MethodChannelMediaExtension extends MediaExtensionPlatform {
     } on PlatformException catch (e) {
       debugPrint(e.message);
     }
-  }
-
-  final eventChannel = const EventChannel('media_resolver');
-
-  @override
-  Future<String> getResolvedContent(String uri) async {
-    String base = '';
-    try {
-      base = await methodChannel
-          .invokeMethod('getResolvedContent', <String, dynamic>{
-        'uri': uri,
-      });
-    } on PlatformException catch (e) {
-      debugPrint(e.message);
-    }
-    return base;
   }
 }
