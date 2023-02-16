@@ -36,7 +36,7 @@ extension ParseToString on IntentAction {
 ///  intentAction.main
 /// ```
 IntentAction actionParser(String actionString) {
-  IntentAction action = IntentAction.pick;
+  IntentAction? action;
 
   switch (actionString) {
     case 'PICK':
@@ -48,12 +48,10 @@ IntentAction actionParser(String actionString) {
     case 'VIEW':
       action = IntentAction.view;
       break;
-    case 'MAIN':
-      action = IntentAction.main;
-      break;
     default:
-      action = IntentAction.unknown;
+      action = IntentAction.main;
   }
+
   return action;
 }
 
@@ -97,7 +95,7 @@ enum MediaType {
 /// ```bash
 ///  MediaType.video
 /// ```
-MediaType? mediaParser(String mediaString) {
+MediaType? mediaParser(String? mediaString) {
   MediaType? type;
 
   switch (mediaString) {
