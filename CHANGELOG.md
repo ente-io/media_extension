@@ -1,3 +1,6 @@
+## 1.0.2
+- Fixed NPE in `getIntentAction`
+
 ## 1.0.1
 - Added `getResolvedContent` method to resolve the recieved content://uri as base64String
   from the app which invoked the plugin using `ACTION_VIEW`
