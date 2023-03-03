@@ -64,6 +64,7 @@ class MediaExtentionAction {
   final MediaType? type;
   final String? extension;
   final String? name;
+
   MediaExtentionAction({
     this.name,
     this.type,

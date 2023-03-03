@@ -1,7 +1,6 @@
 import 'package:media_extension/media_extension_action_types.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
 import 'package:media_extension/media_extension_method_channel.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 abstract class MediaExtensionPlatform extends PlatformInterface {
   /// Constructs a MediaExtensionPlatform.

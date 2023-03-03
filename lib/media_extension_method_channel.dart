@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:media_extension/media_extension_action_types.dart';
-
 import 'package:media_extension/media_extension_platform_interface.dart';
 
 /// An implementation of [MediaExtensionPlatform] that uses method channels.

@@ -52,7 +52,7 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
         ///Method Channel instance is created for channel [media_extension]
         methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "media_extension")
-        
+
         ///To Trigger events in mainThread
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -60,12 +60,13 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             /// to send data from android to flutter thread
             val intentChecker = getIntentAction()
             methodChannel.invokeMethod("getIntentAction", intentChecker)
-        },0)
-        
+        }, 0)
+
         /// Method Channel handler which handles all the methods
         /// invoked from flutter thread
         methodChannel.setMethodCallHandler(this)
     }
+
     /// The Method invoked when a methodCall is executed from flutter thread
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
@@ -94,19 +95,23 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     /// The Method is triggered by the Flutter thread with arguments containing
     /// and [uri] of the received image of type content://xyz
     /// and returns the base64EncodedString of it.
-    private fun getResolvedContent(contentUri:Uri, contentType:String, resolvedContent: HashMap<String,String>) {
-        val resolver =  context.contentResolver
-        val contentStream= resolver.openInputStream(contentUri)
+    private fun getResolvedContent(
+        contentUri: Uri,
+        contentType: String,
+        resolvedContent: HashMap<String, String>
+    ) {
+        val resolver = context.contentResolver
+        val contentStream = resolver.openInputStream(contentUri)
         val cursor: Cursor = resolver.query(contentUri, null, null, null, null)!!
         val nameIndex: Int = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
         cursor.moveToFirst()
-        resolvedContent["name"]  = cursor.getString(nameIndex)
+        resolvedContent["name"] = cursor.getString(nameIndex)
         val fileType = contentType.split("/")
         resolvedContent["type"] = fileType[0]
         resolvedContent["extension"] = fileType[1]
-        if(contentType.startsWith("video")){
+        if (contentType.startsWith("video")) {
             resolvedContent["data"] = contentUri.toString()
-        }else if(contentType.startsWith("image")) {
+        } else if (contentType.startsWith("image")) {
             resolvedContent["data"] = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 Base64.getEncoder().encodeToString(contentStream?.readBytes())
             } else {
@@ -122,48 +127,48 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     /// The Method is triggered when the app is opened and it sends the [intent-action]
     /// and [uri] information in a HashMap Structure to the Flutter thread.
-    private fun getIntentAction() : HashMap<String, String> {
-        val intent: Intent? = activity!!.intent
-        val result = HashMap<String,String>()
+    private fun getIntentAction(): HashMap<String, String> {
+        val intent: Intent? = activity?.intent
+        val result = HashMap<String, String>()
         var resAction = IntentAction.valueOf("MAIN")
-        if(intent!=null){
-                val data: Uri? = intent.data
-                val type: String? = intent.type
-                when(intent.action){
-                    Intent.ACTION_PICK  -> {
-                        resAction = IntentAction.valueOf("PICK")
-                    }
-                    Intent.ACTION_GET_CONTENT -> {
-                        resAction = IntentAction.valueOf("PICK")
-                    }
-                    Intent.ACTION_EDIT -> {
-                        resAction = IntentAction.valueOf("EDIT")
-                    }
-                    Intent.ACTION_VIEW -> {
-                        resAction = IntentAction.valueOf("VIEW")
-                        getResolvedContent(data!!,type!!,result)
-                    }
-                    else -> {
-                        resAction = IntentAction.valueOf("MAIN")
-                    }
+        if (intent != null) {
+            val data: Uri? = intent.data
+            val type: String? = intent.type
+            when (intent.action) {
+                Intent.ACTION_PICK -> {
+                    resAction = IntentAction.valueOf("PICK")
+                }
+                Intent.ACTION_GET_CONTENT -> {
+                    resAction = IntentAction.valueOf("PICK")
+                }
+                Intent.ACTION_EDIT -> {
+                    resAction = IntentAction.valueOf("EDIT")
+                }
+                Intent.ACTION_VIEW -> {
+                    resAction = IntentAction.valueOf("VIEW")
+                    getResolvedContent(data!!, type!!, result)
+                }
+                else -> {
+                    resAction = IntentAction.valueOf("MAIN")
                 }
             }
-           result["action"] = resAction.toString()
-           return result
+        }
+        result["action"] = resAction.toString()
+        return result
     }
 
     /// The Method is triggered by the Flutter thread with arguments containing
     /// and [uri] of the selected image and sends the image to the requested app
     /// via RESULT_ACTION Intent using Content Provider
-    private fun setResult(call: MethodCall){
-        val arguments : Map<String,String>? = (call.arguments() as Map<String,String>?)
+    private fun setResult(call: MethodCall) {
+        val arguments: Map<String, String>? = (call.arguments() as Map<String, String>?)
         val path = arguments!!["uri"]
         val uri = getShareableUri(context, Uri.parse(path))
         val intent = Intent("io.ente.RESULT_ACTION")
         intent.data = uri
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         activity!!.setResult(Activity.RESULT_OK, intent)
-        activity!!.finish()     
+        activity!!.finish()
     }
 
 
@@ -235,7 +240,11 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         return when (uri.scheme?.lowercase(Locale.ROOT)) {
             ContentResolver.SCHEME_FILE -> {
                 uri.path?.let { path ->
-                    FileProvider.getUriForFile(context,"${context.packageName}.file_provider", File(path))
+                    FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.file_provider",
+                        File(path)
+                    )
                 }
             }
             else -> uri
