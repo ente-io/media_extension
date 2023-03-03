@@ -123,7 +123,7 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     /// The Method is triggered when the app is opened and it sends the [intent-action]
     /// and [uri] information in a HashMap Structure to the Flutter thread.
     private fun getIntentAction() : HashMap<String, String> {
-        val intent: Intent? = activity!!.intent
+        val intent: Intent? = activity?.intent
         val result = HashMap<String,String>()
         var resAction = IntentAction.valueOf("MAIN")
         if(intent!=null){
