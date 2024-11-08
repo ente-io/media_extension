@@ -145,7 +145,7 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     resAction = IntentAction.valueOf("EDIT")
                 }
                 Intent.ACTION_VIEW -> {
-                    if(data != null) {
+                    if (data != null) {
                         result["uri"] = data.toString()
                     }
                     resAction = IntentAction.valueOf("VIEW")
