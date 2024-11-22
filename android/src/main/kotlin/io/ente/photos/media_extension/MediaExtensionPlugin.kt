@@ -35,7 +35,7 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private lateinit var methodChannel: MethodChannel
     private lateinit var context: Context
     private var activity: Activity? = null
-    private val logTag = "MediaExtensionPlugin"
+    private val logTag = "EnteMediaExtensionPlugin"
 
     ///ENUM of all the possible IntentAction for a gallery app.
     enum class IntentAction {
@@ -145,8 +145,14 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     resAction = IntentAction.valueOf("EDIT")
                 }
                 Intent.ACTION_VIEW -> {
+                    if (data != null) {
+                        result["uri"] = data.toString()
+                        Log.i(logTag, " dataValueView=$data")
+                    }
+                    if (data != null && !data.toString().contains("https://albums")) {
+                            getResolvedContent(data, type!!, result)
+                    }
                     resAction = IntentAction.valueOf("VIEW")
-                    getResolvedContent(data!!, type!!, result)
                 }
                 else -> {
                     resAction = IntentAction.valueOf("MAIN")
