@@ -8,7 +8,7 @@
 PRODUCT_NAME = media_extension_example
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.mediaExtensionExample
+PRODUCT_BUNDLE_IDENTIFIER = com.example.mediaExtensionExample
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2022 io.ente.photos. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
