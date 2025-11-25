@@ -149,8 +149,8 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         result["uri"] = data.toString()
                         Log.i(logTag, " dataValueView=$data")
                     }
-                    if (data != null && !data.toString().contains("https://albums")) {
-                            getResolvedContent(data, type!!, result)
+                    if (data != null && type != null) {
+                            getResolvedContent(data, type, result)
                     }
                     resAction = IntentAction.valueOf("VIEW")
                 }
