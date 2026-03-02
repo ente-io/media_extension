@@ -4,12 +4,11 @@ import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.database.Cursor
 import android.net.Uri
 import android.os.*
-import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -102,13 +101,29 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     ) {
         val resolver = context.contentResolver
         val contentStream = resolver.openInputStream(contentUri)
-        val cursor: Cursor = resolver.query(contentUri, null, null, null, null)!!
-        val nameIndex: Int = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        cursor.moveToFirst()
-        resolvedContent["name"] = cursor.getString(nameIndex)
-        val fileType = contentType.split("/")
-        resolvedContent["type"] = fileType[0]
-        resolvedContent["extension"] = fileType[1]
+        val resolvedName = resolver.query(
+            contentUri,
+            arrayOf(OpenableColumns.DISPLAY_NAME),
+            null,
+            null,
+            null
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameIndex >= 0) {
+                    cursor.getString(nameIndex)
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+        }
+
+        resolvedContent["name"] = resolvedName ?: fallbackDisplayName(contentUri, contentType)
+        val fileType = contentType.split("/", limit = 2)
+        resolvedContent["type"] = fileType.getOrElse(0) { "" }
+        resolvedContent["extension"] = fileType.getOrElse(1) { "" }
         if (contentType.startsWith("video")) {
             resolvedContent["data"] = contentUri.toString()
         } else if (contentType.startsWith("image")) {
@@ -121,8 +136,21 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 )
             }
         }
-        cursor.close()
         contentStream?.close()
+    }
+
+    private fun fallbackDisplayName(contentUri: Uri, contentType: String): String {
+        val lastSegment = contentUri.lastPathSegment?.substringAfterLast('/')
+        if (!lastSegment.isNullOrBlank()) {
+            return lastSegment
+        }
+
+        val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
+        return if (extension.isNullOrBlank()) {
+            "shared_${System.currentTimeMillis()}"
+        } else {
+            "shared_${System.currentTimeMillis()}.$extension"
+        }
     }
 
     /// The Method is triggered when the app is opened and it sends the [intent-action]
@@ -150,7 +178,11 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         Log.i(logTag, " dataValueView=$data")
                     }
                     if (data != null && type != null) {
+                        try {
                             getResolvedContent(data, type, result)
+                        } catch (e: Exception) {
+                            Log.w(logTag, "failed to resolve intent data for uri=$data type=$type", e)
+                        }
                     }
                     resAction = IntentAction.valueOf("VIEW")
                 }
