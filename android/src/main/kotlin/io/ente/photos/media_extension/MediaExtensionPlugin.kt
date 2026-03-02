@@ -100,7 +100,6 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         resolvedContent: HashMap<String, String>
     ) {
         val resolver = context.contentResolver
-        val contentStream = resolver.openInputStream(contentUri)
         val resolvedName = resolver.query(
             contentUri,
             arrayOf(OpenableColumns.DISPLAY_NAME),
@@ -127,16 +126,18 @@ class MediaExtensionPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         if (contentType.startsWith("video")) {
             resolvedContent["data"] = contentUri.toString()
         } else if (contentType.startsWith("image")) {
+            val imageBytes = resolver.openInputStream(contentUri)?.use { contentStream ->
+                contentStream.readBytes()
+            } ?: ByteArray(0)
             resolvedContent["data"] = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Base64.getEncoder().encodeToString(contentStream?.readBytes())
+                Base64.getEncoder().encodeToString(imageBytes)
             } else {
                 android.util.Base64.encodeToString(
-                    contentStream?.readBytes(),
+                    imageBytes,
                     android.util.Base64.DEFAULT
                 )
             }
         }
-        contentStream?.close()
     }
 
     private fun fallbackDisplayName(contentUri: Uri, contentType: String): String {
